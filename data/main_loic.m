@@ -93,9 +93,9 @@ y=conv(x,h,'same');
 [Sxx, fi]=pwelch(x,hanning(100));
 
 Cxy= mscohere(x,y,hanning(100));
-Sxx = Sx
 
-H = Cxy./Sxx;
+H = Cxy.*Syy;
+h_p = real(ifft(H));
 fa=5000;
 fs = 100000;
 t = 0:1/fs:0.05;
@@ -110,6 +110,8 @@ title("h en tempo")
 figure()
 plot(y)
 title("conv")
-
+figure()
+plot(h_p)
+title("rep. imp.")
 % figure()
 % plot(signal)
