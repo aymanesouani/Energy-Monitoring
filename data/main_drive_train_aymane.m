@@ -129,7 +129,7 @@ signal_entree = chirp(t,0,1,250);
 
 figure(1)
 plot(signal_entree)
-title('Signal entrée : Chirp')
+title('Signal entrÃ©e : Chirp')
 
 windowSize = 2; 
 b = (1/windowSize)*ones(1,windowSize);
