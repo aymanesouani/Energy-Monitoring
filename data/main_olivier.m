@@ -78,6 +78,7 @@ plot(f,mag2db(abs(pyy)))
 [Tvs,f] = tfestimate(vpwm,spwm,hanning(nsc),[],[],fs,'Estimator','H2');
 tvs = ifft(Tvs,'symmetric');
 yest = conv(vpwm,tvs,'same');
+% yest2 = filter(tvs,1,vpwm);
 
 pyyest = pwelch(yest,hanning(nsc),[],[],fs);
 hold on
