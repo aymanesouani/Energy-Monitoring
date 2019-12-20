@@ -68,20 +68,26 @@ end
 
 %% Estimation de S à partir de V
 Nx = length(ipwm);
-nsc = floor(Nx/100);
+nsc = floor(Nx/10);
 nov = floor(nsc/2);
 
+[pxx,f] = pwelch(signal(:,2),hanning(nsc),[],[],fs);
 [pyy,f] = pwelch(signal(:,3),hanning(nsc),[],[],fs);
+[pxy,f] = cpsd(signal(:,2),signal(:,3),hanning(nsc),[],[],fs);
+Tvs = pxy./pxx;
+Tvs = [conj(flip(Tvs(2:end)));Tvs];
+tvs = ifft(ifftshift(Tvs),'symmetric');
+% tvs = tvs(1:floor(length(tvs)/2)+1);
 figure
-plot(f,mag2db(abs(pyy)))
+plot(tvs)
+title('Réponse impulsionnelle')
+% yest = conv(tvs,vpwm);
+yest = filter(tvs,1,vpwm);
 
-% Estimation de S
-[Tvs,f] = tfestimate(vpwm,spwm,hanning(nsc),[],[],fs,'Estimator','H2');
-tvs = ifft(Tvs,'symmetric');
-yest = conv(vpwm,tvs,'same');
-% yest2 = filter(tvs,1,vpwm);
 
 pyyest = pwelch(yest,hanning(nsc),[],[],fs);
+figure
+plot(f,mag2db(abs(pyy)))
 hold on
 plot(f,mag2db(abs(pyyest)))
 legend('DSP du son','DSP du son estimée')
@@ -90,13 +96,48 @@ ylim([min(mag2db(abs(pyyest))) max(mag2db(abs(pyyest)))])
 hold off
 
 figure
-window = 1:500;
+window = 100000:100500;
 stem(Ts(window),spwm(window))
 hold on
 stem(Ts(window),yest(window))
 legend('son à estimer','son estimé')
 hold off
 
+%% Test avec tfestimate
 
+Nx = length(ipwm);
+nsc = floor(Nx/100);
+nov = floor(nsc/2);
+
+[pxx,f] = pwelch(signal(:,2),hanning(nsc),[],[],fs);
+[pyy,f] = pwelch(signal(:,3),hanning(nsc),[],[],fs);
+[pxy,f] = cpsd(signal(:,2),signal(:,3),hanning(nsc),[],[],fs);
+Tvs = tfestimate(vpwm,spwm);
+Tvs = [conj(flip(Tvs(2:end)));Tvs];
+tvs = ifft(fftshift(Tvs),'symmetric');
+tvs = tvs(1:floor(length(tvs)/2)+1);
+% yest = conv(tvs,vpwm);
+figure
+plot(tvs)
+title('Réponse impulsionnelle')
+yest = filter(tvs,1,vpwm);
+
+pyyest = pwelch(yest,hanning(nsc),[],[],fs);
+figure
+plot(f,mag2db(abs(pyy)))
+hold on
+plot(f,mag2db(abs(pyyest)))
+legend('DSP du son','DSP du son estimée')
+xlim([0 f(end)])
+ylim([min(mag2db(abs(pyyest))) max(mag2db(abs(pyyest)))])
+hold off
+
+figure
+window = 100000:100500;
+stem(Ts(window),spwm(window))
+hold on
+stem(Ts(window),yest(window))
+legend('son à estimer','son estimé')
+hold off
 
 
