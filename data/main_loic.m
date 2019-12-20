@@ -132,11 +132,11 @@ ref = sin(2*pi*fa*t);
 bruit = 0.4*sin(2*pi*8*fa*t);
 signal = ref + bruit;
 
-S=(fft(signal));
+S=(fft(ref));
 S=S(1:25000);
 S = [conj(flip(S(1:end))),S];
 s = real(ifft(ifftshift(S),'symmetric'));
-
+mse(s,ref)
 figure()
 plot(abs(S))
 figure()
@@ -144,5 +144,5 @@ subplot(121)
 plot(s)
 title("reconstruit")
 subplot(122)
-plot(signal)
+plot(ref)
 title("ref")
