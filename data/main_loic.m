@@ -34,6 +34,7 @@ subplot(311)
 plot(ipwm)
 title("courant en t")
 subplot(312)
+
 plot(spwm)
 title("son en t")
 subplot(313)
@@ -73,3 +74,44 @@ title("son prédit avec v")
 subplot(122)
 plot(s_pred)
 title("son mesuré")
+
+
+%% Modélisation TF et TFI de H
+clear all
+close all
+clc
+
+h=zeros(500,1);
+h(1:250)=1;
+h(251:500)=-1;
+
+x = zeros(2000,1);
+x(1000)=1;
+
+y=conv(x,h,'same');
+[Syy, fi]=pwelch(y,hanning(100));
+[Sxx, fi]=pwelch(x,hanning(100));
+
+Cxy= mscohere(x,y,hanning(100));
+
+H = Cxy.*Syy;
+h_p = real(ifft(H));
+fa=5000;
+fs = 100000;
+t = 0:1/fs:0.05;
+ref = sin(2*pi*fa*t);
+bruit = 0.4*sin(2*pi*8*fa*t);
+signal = ref + bruit;
+
+
+figure()
+plot(h)
+title("h en tempo")
+figure()
+plot(y)
+title("conv")
+figure()
+plot(h_p)
+title("rep. imp.")
+% figure()
+% plot(signal)
