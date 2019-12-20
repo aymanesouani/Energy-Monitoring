@@ -134,7 +134,7 @@ signal = ref + bruit;
 
 S=(fft(ref));
 S=S(1:25000);
-S = [conj(flip(S(1:end))),S];
+S = [conj(flip(S(2:end))),S];
 s = real(ifft(ifftshift(S),'symmetric'));
 mse(s,ref)
 figure()
@@ -146,3 +146,57 @@ title("reconstruit")
 subplot(122)
 plot(ref)
 title("ref")
+
+
+%% test olivier
+
+clear all
+close all
+clc
+
+load('pwm.mat')
+
+%Periodogram de welch power spectral density estimate
+Ns = length(ipwm);
+Ndiv=floor(Ns/100);
+
+[b,a] = ellip(5,0.7,50,0.1);
+h=impz(b,a,200);
+h=h(15:end);
+
+x = vpwm;
+
+y=conv(x,h,'same');
+
+%perio de welch
+[Sxx f1]=pwelch(x,hanning(Ndiv),[],[],fs);
+[Syy f2]=pwelch(y,hanning(Ndiv),[],[],fs);
+
+
+%Coherence spectrale
+Cxy = mscohere(x,y,hanning(Ndiv),[],[],fs);
+
+%Filtrage wiener approx entre vibration et son
+H=Cxy.*Syy;
+H = [conj(flip(H(2:end)));H];
+h_p = ifft(ifftshift(H),'symmetric');
+
+%Reconstruction
+s_pred=conv(vpwm,h_p,'same');
+mse = mse(spwm,s_pred)
+
+
+figure()
+plot(f1,Cxy)
+title("CSxy")
+
+figure()
+subplot(121)
+plot(s_pred)
+title("son prédit avec v")
+subplot(122)
+plot(s_pred)
+title("son mesuré")
+
+
+
