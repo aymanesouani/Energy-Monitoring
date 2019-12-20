@@ -19,14 +19,15 @@ cvs = mscohere(vpwm,spwm,hanning(Ndiv),[],[],fs);
 cis = mscohere(ipwm,spwm,hanning(Ndiv),[],[],fs);
 
 %Filtrage wiener approx entre vibration et son
-pv_norm = pv./pv;
-H=cvs./pv_norm;
-h=real(ifft(H,'symmetric'));
+H=cvs.*ps;
+%h=real(ifft(H,'symmetric'));
+H = [conj(flip(H(2:end)));H];
+h_p = ifft(ifftshift(H),'symmetric');
 
 
 %Reconstruction
-test=vpwm(1:2049);
-s_pred=conv(vpwm,h,'same');
+test=vpwm(1:length(h_p));
+s_pred=conv(vpwm,h_p,'same');
 mse = mse(spwm,s_pred)
 
 figure()
@@ -64,7 +65,7 @@ plot(fv,cis)
 title("CS courant/son")
 
 figure()
-plot(fS,20*log(abs(H)))
+plot(20*log(abs(H)))
 title("fonction de transfert H")
 
 figure()
@@ -76,7 +77,50 @@ plot(s_pred)
 title("son mesuré")
 
 
-%% Modélisation TF et TFI de H
+%% Modélisation TF et TFI de H ARCHI FAUX C4EST PAS LINEAIRE
+clear all
+close all
+clc
+
+fa=5000;
+fs = 100000;
+t = 1/fs:1/fs:0.5;
+ref = sin(2*pi*fa*t);
+bruit = 0.4*sin(2*pi*8*fa*t);
+signal = ref + bruit;
+
+h = rand(1000,1);
+test=fft(h);
+x=signal;
+
+y=conv(x,h,'valid');
+y=[y,zeros(1,length(h)-1)];
+
+[Syy, fi]=pwelch(y,hanning(100), [], length(t)/2,fs);
+[Sxx, fi]=pwelch(x,hanning(100), [], length(t)/2,fs);
+
+Cxy= mscohere(x,y,hanning(100), [], length(t)/2,fs);
+
+H = Cxy.*Syy;
+% H = [conj(flip(H(2:end)));H];
+% h_p = ifft(ifftshift(H),'symmetric');
+
+
+
+
+% figure()
+% plot(h)
+% title("h en tempo")
+% figure()
+% plot(y)
+% title("conv")
+% figure()
+% plot(h_p)
+% title("rep. imp.")
+% figure()
+% plot(Cxy)
+
+%% Reconstruction d'un signal temporelle à partir de la moitier d'un spectre
 clear all
 close all
 clc
@@ -88,38 +132,17 @@ ref = sin(2*pi*fa*t);
 bruit = 0.4*sin(2*pi*8*fa*t);
 signal = ref + bruit;
 
-
-% h=zeros(500,1);
-% h(1:250)=1;
-% h(251:500)=-1;
-
-h = hamming(10000);
-
-% x = zeros(2000,1);
-% x(1000)=1;
-
-x=signal;
-
-y=conv(x,h,'same');
-
-[Syy, fi]=pwelch(y,hanning(100), [], [],fs);
-[Sxx, fi]=pwelch(x,hanning(100), [], [],fs);
-
-Cxy= mscohere(x,y,hanning(100), [], [],fs);
-
-H = Cxy.*Syy;
-h_p = real(ifftshift(ifft(H)));
-
-
+S=(fft(signal));
+S=S(1:25000);
+S = [conj(flip(S(1:end))),S];
+s = real(ifft(ifftshift(S),'symmetric'));
 
 figure()
-plot(h)
-title("h en tempo")
+plot(abs(S))
 figure()
-plot(y)
-title("conv")
-figure()
-plot(h_p)
-title("rep. imp.")
-% figure()
-% plot(signal)
+subplot(121)
+plot(s)
+title("reconstruit")
+subplot(122)
+plot(signal)
+title("ref")
