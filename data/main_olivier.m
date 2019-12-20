@@ -68,13 +68,13 @@ end
 
 %% Estimation de S à partir de V
 Nx = length(ipwm);
-nsc = floor(Nx/10);
+nsc = floor(Nx/80);
 nov = floor(nsc/2);
 
 [pxx,f] = pwelch(signal(:,2),hanning(nsc),[],[],fs);
 [pyy,f] = pwelch(signal(:,3),hanning(nsc),[],[],fs);
 [pxy,f] = cpsd(signal(:,2),signal(:,3),hanning(nsc),[],[],fs);
-Tvs = pxy./pxx;
+Tvs = (pxy)./pxx;
 Tvs = [conj(flip(Tvs(2:end)));Tvs];
 tvs = ifft(ifftshift(Tvs),'symmetric');
 % tvs = tvs(1:floor(length(tvs)/2)+1);
@@ -82,7 +82,7 @@ figure
 plot(tvs)
 title('Réponse impulsionnelle')
 % yest = conv(tvs,vpwm);
-yest = filter(tvs,1,vpwm);
+yest = conv(vpwm,tvs,'same');
 
 
 pyyest = pwelch(yest,hanning(nsc),[],[],fs);
@@ -103,24 +103,45 @@ stem(Ts(window),yest(window))
 legend('son à estimer','son estimé')
 hold off
 
-%% Test avec tfestimate
+%% Modélisation TF et TFI de H
+clear all
+close all
+clc
 
-Nx = length(ipwm);
+
+load('pwm.mat')
+signal = [ipwm,vpwm,spwm];
+Ts = 1/fs*(0:(length(ipwm)-1));
+Fs = 0:floor(fs/2);
+
+[b,a] = ellip(5,0.7,50,0.1);
+h=impz(b,a,200);
+h=h(15:end);
+
+x = vpwm;
+
+y=conv(x,h,'same');
+
+Nx = length(x);
 nsc = floor(Nx/100);
 nov = floor(nsc/2);
 
-[pxx,f] = pwelch(signal(:,2),hanning(nsc),[],[],fs);
-[pyy,f] = pwelch(signal(:,3),hanning(nsc),[],[],fs);
-[pxy,f] = cpsd(signal(:,2),signal(:,3),hanning(nsc),[],[],fs);
-Tvs = tfestimate(vpwm,spwm);
+[pxx,f] = pwelch(x,hanning(nsc),[],[],fs);
+[pyy,f] = pwelch(y,hanning(nsc),[],[],fs);
+[pxy,f] = cpsd(x,y,hanning(nsc),[],[],fs);
+Tvs = pxy./pxx;
 Tvs = [conj(flip(Tvs(2:end)));Tvs];
-tvs = ifft(fftshift(Tvs),'symmetric');
-tvs = tvs(1:floor(length(tvs)/2)+1);
-% yest = conv(tvs,vpwm);
+tvs = ifft(ifftshift(Tvs),'symmetric');
+% tvs = tvs(floor(length(tvs)/2):end);
 figure
 plot(tvs)
+hold on
+plot(h)
+legend('estimée','vraie')
 title('Réponse impulsionnelle')
-yest = filter(tvs,1,vpwm);
+
+yest = conv(x,tvs,'same');
+
 
 pyyest = pwelch(yest,hanning(nsc),[],[],fs);
 figure
@@ -133,11 +154,9 @@ ylim([min(mag2db(abs(pyyest))) max(mag2db(abs(pyyest)))])
 hold off
 
 figure
-window = 100000:100500;
-stem(Ts(window),spwm(window))
+window = 500:1000;
+stem(y(window))
 hold on
-stem(Ts(window),yest(window))
+stem(yest(window))
 legend('son à estimer','son estimé')
 hold off
-
-
