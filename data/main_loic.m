@@ -81,27 +81,35 @@ clear all
 close all
 clc
 
-h=zeros(500,1);
-h(1:250)=1;
-h(251:500)=-1;
-
-x = zeros(2000,1);
-x(1000)=1;
-
-y=conv(x,h,'same');
-[Syy, fi]=pwelch(y,hanning(100));
-[Sxx, fi]=pwelch(x,hanning(100));
-
-Cxy= mscohere(x,y,hanning(100));
-
-H = Cxy.*Syy;
-h_p = real(ifft(H));
 fa=5000;
 fs = 100000;
-t = 0:1/fs:0.05;
+t = 0:1/fs:0.5;
 ref = sin(2*pi*fa*t);
 bruit = 0.4*sin(2*pi*8*fa*t);
 signal = ref + bruit;
+
+
+% h=zeros(500,1);
+% h(1:250)=1;
+% h(251:500)=-1;
+
+h = hamming(10000);
+
+% x = zeros(2000,1);
+% x(1000)=1;
+
+x=signal;
+
+y=conv(x,h,'same');
+
+[Syy, fi]=pwelch(y,hanning(100), [], [],fs);
+[Sxx, fi]=pwelch(x,hanning(100), [], [],fs);
+
+Cxy= mscohere(x,y,hanning(100), [], [],fs);
+
+H = Cxy.*Syy;
+h_p = real(ifftshift(ifft(H)));
+
 
 
 figure()
