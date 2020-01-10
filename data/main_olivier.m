@@ -67,14 +67,26 @@ for i=1:2
 end
 
 %% Estimation de S à partir de V
+clear all
+close all
+clc
+
+load('pwm.mat')
+signal = [ipwm,vpwm,spwm];
+Ts = 1/fs*(0:(length(ipwm)-1));
+Fs = 0:floor(fs/2);
+
 Nx = length(ipwm);
-nsc = floor(Nx/80);
+nsc = floor(Nx/200);
 nov = floor(nsc/2);
 
-[pxx,f] = pwelch(signal(:,2),hanning(nsc),[],[],fs);
-[pyy,f] = pwelch(signal(:,3),hanning(nsc),[],[],fs);
+[pxx,f] = cpsd(signal(:,2),signal(:,2),hanning(nsc),[],[],fs);
+pxx = abs(pxx);
+[pyy,f] = cpsd(signal(:,3),signal(:,3),hanning(nsc),[],[],fs);
+pyy = abs(pyy);
 [pxy,f] = cpsd(signal(:,2),signal(:,3),hanning(nsc),[],[],fs);
-Tvs = (pxy)./pxx;
+
+Tvs = pxy./pxx;
 Tvs = [conj(flip(Tvs(2:end)));Tvs];
 tvs = ifft(ifftshift(Tvs),'symmetric');
 % tvs = tvs(1:floor(length(tvs)/2)+1);
@@ -126,8 +138,10 @@ Nx = length(x);
 nsc = floor(Nx/100);
 nov = floor(nsc/2);
 
-[pxx,f] = pwelch(x,hanning(nsc),[],[],fs);
-[pyy,f] = pwelch(y,hanning(nsc),[],[],fs);
+[pxx,f] = cpsd(x,x,hanning(nsc),[],[],fs);
+pxx = abs(pxx);
+[pyy,f] = cpsd(y,y,hanning(nsc),[],[],fs);
+pyy = abs(pyy);
 [pxy,f] = cpsd(x,y,hanning(nsc),[],[],fs);
 Tvs = pxy./pxx;
 Tvs = [conj(flip(Tvs(2:end)));Tvs];
