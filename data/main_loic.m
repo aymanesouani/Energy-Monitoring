@@ -73,7 +73,7 @@ subplot(121)
 plot(s_pred)
 title("son prédit avec v")
 subplot(122)
-plot(s_pred)
+plot(spwm)
 title("son mesuré")
 
 
@@ -174,29 +174,44 @@ y=conv(x,h,'same');
 
 
 %Coherence spectrale
-Cxy = mscohere(x,y,hanning(Ndiv),[],[],fs);
-
+%Cxy = mscohere(x,y,hanning(Ndiv),[],[],fs);
+Cxy = cpsd(x,y,hanning(Ndiv),[],[],fs);
+Cyy = cpsd(y,y,hanning(Ndiv),[],[],fs);
+Cxx = cpsd(x,x,hanning(Ndiv),[],[],fs);
 %Filtrage wiener approx entre vibration et son
-H=Cxy.*Syy;
-H = [conj(flip(H(2:end)));H];
+%H=Cxy.*Syy;
+H=Cxy./Cxx;
+H = [conj(flip(H(1:end)));H];
 h_p = ifft(ifftshift(H),'symmetric');
+%h_p = ifft(H,'symmetric');
 
 %Reconstruction
-s_pred=conv(vpwm,h_p,'same');
+s_pred=filter(h_p,1,vpwm);
 mse = mse(spwm,s_pred)
 
 
 figure()
-plot(f1,Cxy)
+plot(f1,abs(Cxy))
 title("CSxy")
+
+figure()
+subplot(121)
+plot(h_p)
+title("h predit")
+xlim([0 200])
+subplot(122)
+plot(h)
+title("h ref")
 
 figure()
 subplot(121)
 plot(s_pred)
 title("son prédit avec v")
 subplot(122)
-plot(s_pred)
+plot(y)
 title("son mesuré")
 
+s_pred=s_pred/max(s_pred);
 
+%soundsc(s_pred,fs)
 
