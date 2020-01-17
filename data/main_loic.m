@@ -5,6 +5,27 @@ clc
 load('pwm.mat')
 
 
+
+%% Stationnaire ou non ?
+
+signal = [ipwm,vpwm,spwm];
+label = ["courant","vibration","son"]
+Ts = 1/fs*(0:(length(ipwm)-1));
+Fs = 0:floor(fs/2);
+Nx = length(ipwm);
+nsc = floor(Nx/20);
+nov = floor(nsc/2);
+figure
+for i=1:3
+    [s,w,time] = spectrogram(signal(:,i),hanning(nsc),nov);
+    subplot(1,3,i)
+    imagesc(time/1000,w/pi*fs,abs(s))
+    title(label(i))
+    xlabel("temps (s)")
+    ylabel("fréquence (Hz)")
+    xlim([0 6])
+end
+%%
 %Periodogram de welch power spectral density estimate
 Ns = length(ipwm);
 Ndiv=floor(Ns/100);

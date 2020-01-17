@@ -12,6 +12,7 @@ Fs = 0:floor(fs/2);
 Nx = length(ipwm);
 nsc = floor(Nx/20);
 nov = floor(nsc/2);
+
 figure
 for i=1:3
     t = spectrogram(signal(:,i),hanning(nsc),nov);
