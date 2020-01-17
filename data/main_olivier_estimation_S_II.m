@@ -53,20 +53,20 @@ hold off
 subplot(212)
 [Cyyest,f] = mscohere(y,yest,hanning(nsc),[],[],fs);
 [Cyx,f] = mscohere(y,x,hanning(nsc),[],[],fs);
-plot(f,(abs(Cyyest)))
-hold on
 plot(f,(abs(Cyx)))
+hold on
+plot(f,(abs(Cyyest)))
 hold off
 xlim([0 f(end)])
-legend('Cyyest','Cyx')
+legend('Cyx','Cyyest')
 
 
 % Affichage des données temporelles
 figure
 window = 10000:10500;
-stem(Ts(window),y(window))
+plot(Ts(window),y(window))
 hold on
-stem(Ts(window),yest(window))
+plot(Ts(window),yest(window))
 xlim([-inf inf])
 legend('Son à estimer','Son estimé')
 hold off
