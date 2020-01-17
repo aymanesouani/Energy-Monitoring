@@ -66,70 +66,7 @@ for i=1:2
 
 end
 
-%% Estimation de S à partir de V
-clear all
-close all
-clc
 
-load('pwm.mat')
-signal = [ipwm,vpwm,spwm];
-Ts = 1/fs*(0:(length(ipwm)-1));
-Fs = 0:floor(fs/2);
-
-Nx = length(ipwm);
-nsc = floor(Nx/150);
-nov = floor(nsc/2);
-
-% x = signal(:,1).*signal(:,1);
-x = signal(:,2);
-y = signal(:,3);
-
-[pxx,fxx] = cpsd(x,x,hanning(nsc),[],[],fs,'twosided');
-pxx = abs(pxx);
-[pyy,fyy] = cpsd(y,y,hanning(nsc),[],[],fs);
-pyy = abs(pyy);
-[pyx,fyx] = cpsd(y,x,hanning(nsc),[],[],fs,'twosided');
-
-Tvs = pyx./pxx;
-tvs = fftshift(ifft(Tvs,'symmetric'));
-
-% tvs = flip(fftshift(ifft(ifftshift(Tvs),'symmetric')));
-% tvs = tvs(1:floor(length(tvs)/2)+1);
-figure
-plot(tvs)
-title('Réponse impulsionnelle')
-% yest = conv(tvs,vpwm);
-yest = conv(vpwm,tvs,'same');
-
-
-pyyest = pwelch(yest,hanning(nsc),[],[],fs);
-figure
-subplot(211)
-plot(fyy,mag2db(abs(pyy)))
-hold on
-plot(fyy,mag2db(abs(pyyest)))
-legend('DSP du son','DSP du son estimée')
-xlim([0 fyy(end)])
-ylim([min(mag2db(abs(pyyest))) max(mag2db(abs(pyyest)))])
-hold off
-
-subplot(212)
-[Cyyest,f] = mscohere(y,yest,hanning(nsc),[],[],fs);
-plot(f,abs(Cyyest))
-hold on
-yyaxis right
-plot(f,20*log10(abs(Cyyest)))
-hold off
-xlim([0 f(end)])
-
-figure
-window = 10000:20000;
-stem(Ts(window),spwm(window))
-hold on
-stem(Ts(window),yest(window))
-xlim([-inf inf])
-legend('son à estimer','son estimé')
-hold off
 
 %% Modélisation TF et TFI de H
 clear all
