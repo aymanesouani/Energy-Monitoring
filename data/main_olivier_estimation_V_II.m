@@ -70,3 +70,5 @@ plot(Ts(window),yest(window))
 xlim([-inf inf])
 legend('Vibrations à estimer','Vibrations estimées')
 hold off
+
+var(yest)/var(y)

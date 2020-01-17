@@ -67,3 +67,5 @@ plot(Ts(window),yest(window))
 xlim([-inf inf])
 legend('son à estimer','son estimé')
 hold off
+
+var(yest)/var(y)
