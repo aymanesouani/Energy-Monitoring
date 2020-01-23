@@ -2,10 +2,10 @@
 ### Energy-Monitoring ###
 #########################
 
-@auteur : Olivier VU THANH & Loïc ARGENTIER, Aymane SOUANI, Ahmed El Hazard JEBBARI  élève ingénieurs en 3ème année à ENSE3/PHELMA option SICOM
+@auteur : Olivier VU THANH, Loïc ARGENTIER, Aymane SOUANI, Ahmed El Azhard JEBBARI élève ingénieurs en 3ème année à ENSE3/PHELMA option SICOM
 
-SUJET : Drive train
+SUJET : Etude vibroacoustique d’un moteur electrique
 
-Il faudrait faire un main propre pour M.Granjon
+Le script réalisant l'ensembles des filtres afin d'estimer le son à partir du courant² est le suivant : "main_olivier_estimation_S_II.m"
 
-lien : https://www.overleaf.com/1713882576bhrvvyctwgws
+lien du rapport : https://www.overleaf.com/read/jpvxtwtjpfkh
